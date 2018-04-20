@@ -1,6 +1,4 @@
 require 'watir'
-browser = Watir::Browser.new :chrome, url: "http://hub:4444/wd/hub"
-
 caps = Selenium::WebDriver::Remote::Capabilities.new
 
 caps["name"] = "Bulletin Board Test Example"
