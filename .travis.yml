@@ -1,0 +1,16 @@
+language: python
+
+sudo: required
+
+services:
+  - docker
+
+notifications:
+    slack: seleniumhq:Kx5MB7T51SPMpbBMYfvxNW4q
+
+before_install:
+  - docker info
+  - docker-compose version
+
+script:
+  - docker-compose -f docker-compose.yaml up --abort-on-container-exit --build
