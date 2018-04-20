@@ -1,0 +1,35 @@
+# # How to run this? -> docker-compose -f docker-compose-all-zalenium.yml up --abort-on-container-exit --build
+version: '2'
+services:
+  hub:
+    image: dosel/zalenium
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/videos:/home/seluser/videos
+    ports:
+      - "4444:4444"
+    command: >
+      start --desiredContainers 0 --maxDockerSeleniumContainers 8
+            --screenWidth 1024 --screenHeight 768
+            --timeZone "Europe/Berlin" --videoRecordingEnabled true
+
+  bulletin:
+    image: bulletin_board:latest
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    depends_on:
+      - hub
+    ports:
+      - "8080:8080"
+
+  test:
+    image: watir:latest
+    build:
+      context: ./
+      dockerfile: ./Dockerfile_RubyTest
+    depends_on:
+      - bulletin
+    volumes:
+      - .:/tmp
+    command: ["./wait-for-grid.sh", "ruby", "/tmp/bulletin_board.rb"]

@@ -1,0 +1,50 @@
+# # How to run this? -> docker-compose -f docker-compose.yaml up --abort-on-container-exit --build
+version: '2'
+services:
+  firefox:
+    image: selenium/node-firefox-debug
+    ports:
+      - "5901:5900"
+    volumes:
+      - /dev/shm:/dev/shm
+    depends_on:
+      - hub
+    environment:
+      HUB_HOST: hub
+
+  chrome:
+    image: selenium/node-chrome-debug
+    ports:
+      - "5900:5900"
+    volumes:
+      - /dev/shm:/dev/shm
+    depends_on:
+      - hub
+    environment:
+      HUB_HOST: hub
+
+  hub:
+    image: selenium/hub
+    ports:
+      - "4444:4444"
+
+  bulletin:
+    image: bulletin_board:latest
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    depends_on:
+      - hub
+    ports:
+      - "8080:8080"
+
+  test:
+    image: watir:latest
+    build:
+      context: ./
+      dockerfile: ./Dockerfile_RubyTest
+    depends_on:
+      - bulletin
+    volumes:
+      - .:/tmp
+    command: ["./wait-for-grid.sh", "ruby", "/tmp/bulletin_board.rb"]
